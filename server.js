@@ -12,6 +12,7 @@ const connection = mysql.createConnection({
 
 connection.connect(function(err) {
   if (err) throw err;
+  console.log(`Connected to mysql as id ${connection.threadId}`);
   start();
 });
 
@@ -113,21 +114,6 @@ function mgrEmployees() {
 //4
 function addEmployee() {
     inquirer
-    .prompt ({
-        name: "add",
-        type: "input",
-        choices: function() {
-            const infoArray = [];
-            for (var i = 0; i < results.length; i++) {
-                infoArray.push(results[i].item)
-            }
-        }
-    })   
-};
-
-
-function addEmployee() {
-    inquirer
     .prompt([
         {
             name: "first_name",
@@ -171,7 +157,24 @@ function addEmployee() {
 
 //5
 function removeEmployee() {
-
+    connection.query('SELECT first_name, last_name FROM employee', (err, data) => {
+        if (err) throw err;
+    inquirer
+    .prompt({
+        name: "remove",
+        type: "list",
+        message: "Which employee would you like to remove?",
+        choices: data
+    })
+    .then(connection.query("DELETE FROM employee WHERE ?", { answer: answer },
+        function(err, res) {
+            if (err) throw err;
+            console.log(res.affectedRows + "has been removed.\n");
+            start();
+            }
+            )
+        );
+    });
 };
 //6
 function updateRole() {

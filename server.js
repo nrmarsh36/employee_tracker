@@ -74,7 +74,7 @@ function allEmployees() {
     console.log("Displaying all employees... \n")
     connection.query("SELECT * FROM employee", function(err, res) {
         if (err) throw err;
-        console.log(res);
+        console.table(res);
         //Do i need this???
         start();
     });
@@ -82,24 +82,27 @@ function allEmployees() {
 
 //2
 function dptEmployees() {
-    inquirer
-    .prompt({
-        name:"employee",
-        type: "list",
-        message: "What department would you like to select?",
-        choices: [
-            "IT Department",
-            "Accounting",
-            "Human Resources",
-            "Sales",
-            "Management"
-        ]
+    connection.query("SELECT dpt_name FROM department", function(err, results) {
+        if (err) throw err;
+        inquirer
+        .prompt({
+            name:"employeesByD",
+            type: "list",
+            message: "What department would you like to select?",
+            choices: function() {
+                var choiceArray = [];
+                for (var i = 0; i < results.length; i++) {
+                  choiceArray.push(results[i].dpt_name);
+                }
+                return choiceArray;
+              },
+        })
     })
     .then(function(answer) {
-        const query = "SELECT first_name, last_name FROM employee WHERE role_id = department_id FROM department";
-        connection.query(query, { department: answer.department}, function(err, res) {
+        const query = "SELECT employee.first_name, employee.last_name WHERE dpt_name = ?";
+        connection.query(query, { dpt_name: answer.dpt_name}, function(err, res) {
             for (var i = 0; i < res.length ; i++) {
-                console.log("Employees: " + res[i].first_name, res[i].last_name);
+                console.table("Employees: " + res[i].first_name, res[i].last_name);
             }
             start();
         });
@@ -126,7 +129,7 @@ function addEmployee() {
             message: "What is the employee's last name?"
         }, 
         {
-            name: "role",
+            name: "title",
             type: "list",
             message: "What is the employee's role?",
             choices: [
@@ -144,11 +147,12 @@ function addEmployee() {
             {
                 first_name: answer.first_name,
                 last_name: answer.last_name,
-                role_id: answer.role_id
+                title: answer.title
             },
         function(err) {
             if (err) throw err;
             console.log("Employee added successfully.");
+            console.table(res)
         start();
             }
         );

@@ -107,9 +107,9 @@ function dptEmployees() {
 };
 
 //3
-function mgrEmployees() {
+// function mgrEmployees() {
 
-};
+// };
 
 //4
 function addEmployee() {
@@ -176,12 +176,49 @@ function removeEmployee() {
         );
     });
 };
+
 //6
 function updateRole() {
-
+    connection.query("SELECT first_name, last_name, role_id FROM employee", function(err, results) {
+        if (err) throw err;
+        inquirer
+            .prompt([{
+                    name: "choices",
+                    type: "rawlist",
+                    message: "Which employee would you like to update?",
+                    choices: function() {
+                        const choiceArray = [first_name, last_name, role_id];
+                        for (var i = 0; i < results.length; i++) {
+                            choiceArray.push(results[i].first_name, results[i].last_name, results[i].role_id);
+                            }
+                        return choiceArray
+                        },
+                        name: "newRole",
+                        type: "list",
+                        message: "What is the employee's new role?",
+                        choices: function() {
+                            var roleArray = [role_id, title];
+                            for (var i = 0; i < results.length; i++) {
+                                roleArray.push(results[i].role_id, results[i].title)
+                            }
+                        }
+                    }])
+                    .then(function(answer) {
+                        var query = "SELECT role_id, title FROM role";
+                        connection.query(query, [answer.first_name, answer.last_name, answer.role_id], function(err, results) {
+                            for (var i = 0; i < results.length; i++) {
+                                console.log(
+                                    "Employee: " + results[i].first_name + results[i].last_name,
+                                    "Role: " + results[i].role_id
+                                );
+                            }
+                            start();
+                        })
+                    });              
+    });
 };
 //7
-function updateMgr() {
+// function updateMgr() {
 
-};
+// };
 

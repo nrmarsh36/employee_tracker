@@ -97,15 +97,18 @@ function dptEmployees() {
                 return choiceArray;
               },
         })
-    })
+
     .then(function(answer) {
         const query = "SELECT employee.first_name, employee.last_name WHERE dpt_name = ?";
         connection.query(query, { dpt_name: answer.dpt_name}, function(err, res) {
-            for (var i = 0; i < res.length ; i++) {
-                console.table("Employees: " + res[i].first_name, res[i].last_name);
+            for (var i = 0; i < res; i++) {
+                if (results[i].dpt_name === answer.employeesByD) {
+                    console.table("Employees: " + res[i].first_name, res[i].last_name);
+                }
             }
             start();
         });
+    })
     });
 };
 

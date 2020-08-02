@@ -29,11 +29,11 @@ function start() {
         choices: [
             "View all employees",
             "View all employees by department",
-            "View all employees by manager",
+            // "View all employees by manager",
             "Add an employee",
             "Remove an employee",
             "Update an employee's role",
-            "Update an employee's manager"
+            // "Update an employee's manager"
         ]
     })
     .then(function(answer) {
@@ -46,9 +46,9 @@ function start() {
             dptEmployees();
             break;
         
-        case "View all employees by manager":
-            mgrEmployees();
-            break;
+        // case "View all employees by manager":
+        //     mgrEmployees();
+        //     break;
 
         case "Add an employee":
             addEmployee();
@@ -62,9 +62,9 @@ function start() {
             updateRole();
             break;
         
-        case "Update an employee's manager":
-            updateMgr();
-            break;        
+        // case "Update an employee's manager":
+        //     updateMgr();
+        //     break;        
         };
     });
 };
@@ -72,7 +72,7 @@ function start() {
  //1
 function allEmployees() {
     console.log("Displaying all employees... \n")
-    connection.query("SELECT * FROM employees", function(err, res) {
+    connection.query("SELECT * FROM employee", function(err, res) {
         if (err) throw err;
         console.log(res);
         //Do i need this???
@@ -96,10 +96,10 @@ function dptEmployees() {
         ]
     })
     .then(function(answer) {
-        const query = "SELECT name FROM department WHERE ?";
+        const query = "SELECT first_name, last_name FROM employee WHERE role_id = department_id FROM department";
         connection.query(query, { department: answer.department}, function(err, res) {
             for (var i = 0; i < res.length ; i++) {
-                console.log("Department: " + res[i].name);
+                console.log("Employees: " + res[i].first_name, res[i].last_name);
             }
             start();
         });
@@ -144,7 +144,7 @@ function addEmployee() {
             {
                 first_name: answer.first_name,
                 last_name: answer.last_name,
-                role: answer.role
+                role_id: answer.role_id
             },
         function(err) {
             if (err) throw err;
@@ -157,14 +157,14 @@ function addEmployee() {
 
 //5
 function removeEmployee() {
-    connection.query('SELECT first_name, last_name FROM employee', (err, data) => {
+    connection.query('SELECT first_name, last_name FROM employee', (err, res) => {
         if (err) throw err;
     inquirer
     .prompt({
         name: "remove",
-        type: "list",
+        type: "rawlist",
         message: "Which employee would you like to remove?",
-        choices: data
+        choices: res
     })
     .then(connection.query("DELETE FROM employee WHERE ?", { answer: answer },
         function(err, res) {
@@ -204,7 +204,7 @@ function updateRole() {
                         }
                     }])
                     .then(function(answer) {
-                        var query = "SELECT role_id, title FROM role";
+                        var query = "UPDATE role_id, title FROM role";
                         connection.query(query, [answer.first_name, answer.last_name, answer.role_id], function(err, results) {
                             for (var i = 0; i < results.length; i++) {
                                 console.log(
